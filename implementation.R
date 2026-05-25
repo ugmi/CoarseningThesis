@@ -144,11 +144,12 @@ summary_bias <- function(arr, true.vals) {
 set.seed(1984)
 widths <- c("1" = 1, "2" = 30, "3" = 365)  # interval widths
 days <- c(181, 365, 546, 730, 911, 1095, 1276, 1461, 1643, 1826)
+N <- 1000
 
 # Short-term survival ----------------------------------------------------------
 pars1 <- c("shape" = 0.5, "scale" = 200)
 S1 <- 1 - pweibull(days, pars1[["shape"]], pars1[["scale"]])
-df.pars1 <- list("n" = 2000, "pars" = pars1, "width" = widths)
+df.pars1 <- list("n" = N, "pars" = pars1, "width" = widths)
 
 # Estimation and derivation of statistics
 est1 <- repeat_estimation(1000, days, df.pars1)
@@ -158,7 +159,7 @@ prob.bias1 <- summary_bias(est1[["prob"]], S1)
 # Long-term survival -----------------------------------------------------------
 pars5 <- c("shape" = 0.6, "scale" = 2000)
 S5 <- 1 - pweibull(days, pars5[["shape"]], pars5[["scale"]])
-df.pars5 <- list("n" = 2000, "pars" = pars5, "width" = widths)
+df.pars5 <- list("n" = N, "pars" = pars5, "width" = widths)
 
 # Estimation and derivation of statistics
 est5 <- repeat_estimation(1000, days, df.pars5)
@@ -168,21 +169,18 @@ prob.bias5 <- summary_bias(est5[["prob"]], S5)
 # Figures ----------------------------------------------------------------------
 source("./plots.R")
 
-# Boxplots for estimated 1-year and 5-year survival probabilities
-plot_boxplots(est1[["prob"]][,2,,], S1[2])  # Short survival, 1-year
-plot_boxplots(est1[["prob"]][,10,,], S1[10])  # Short survival, 5-year
-plot_boxplots(est5[["prob"]][,2,,], S5[2])  # Long survival, 1-year
-plot_boxplots(est5[["prob"]][,10,,], S5[10])  # Long survival, 5-year
-
 # True survival curves and average estimated survival probabilities
-plot_means(prob.bias1[1,,,1] + S1, prob.bias5[1,,,1] + S5, pars1, pars5)  # 1
-plot_means(prob.bias1[1,,,2] + S1, prob.bias5[1,,,2] + S5, pars1, pars5)  # 30
-plot_means(prob.bias1[1,,,3] + S1, prob.bias5[1,,,3] + S5, pars1, pars5)  # 365
+plot_means(prob.bias1[1,,,1] + S1, prob.bias5[1,,,1] + S5, pars1, pars5, 
+           paste0("w1n", N, ".png"))
+plot_means(prob.bias1[1,,,2] + S1, prob.bias5[1,,,2] + S5, pars1, pars5, 
+           paste0("w30n", N, ".png"))
+plot_means(prob.bias1[1,,,3] + S1, prob.bias5[1,,,3] + S5, pars1, pars5, 
+           paste0("w365n", N, ".png"))
 
 # Probability bias tables
-table_prob(prob.bias1[,2,,], prob.bias5[,2,,], "prob.1year.tex")  # 1-year
-table_prob(prob.bias1[,10,,], prob.bias5[,10,,], "prob.5year.tex")  # 5-year
+table_prob(prob.bias1[,2,,], prob.bias5[,2,,], paste0("prob.y1n", N, ".tex"))
+table_prob(prob.bias1[,10,,], prob.bias5[,10,,], paste0("prob.y5n", N, ".tex"))
 
 # Parameter bias table
-table_par(par.bias1, par.bias5, pars1, pars5, "par.table.tex")
+table_par(par.bias1, par.bias5, pars1, pars5, paste0("par.table", N, ".tex"))
 

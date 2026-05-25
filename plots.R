@@ -94,8 +94,9 @@ plot_boxplots <- function(ests, true.surv) {
 #' @param means5 Array of means for long survival setting
 #' @param pars1 A named list of dist. parameters for short survival setting
 #' @param pars5 A named list of dist. parameters for long survival setting
+#' @param fname File name for saving the plot
 #' @return NULL
-plot_means <- function(means1, means5, pars1, pars5) {
+plot_means <- function(means1, means5, pars1, pars5, fname = "means.png") {
   surv1 <- 1 - pweibull(0:2000, pars1[["shape"]], pars1[["scale"]])
   surv5 <- 1 - pweibull(0:2000, pars5[["shape"]], pars5[["scale"]])
   ymax <- max(max(means1), max(means5))
@@ -105,6 +106,7 @@ plot_means <- function(means1, means5, pars1, pars5) {
   cols <- c("darkorange", "red", "brown", "forestgreen", "royalblue", "cyan3")
   
   # Make the plot
+  png(fname, width = 700, height = 400)
   par(mar = c(4, 4, 1, 1), xpd = FALSE)
   plot(days, means1[, 1], pch = 20, col = cols[1], ylim = c(0, 1), xaxt = "n",
        xlim = c(0, 1900), xlab = "Time in days", ylab = "Survival probability", 
@@ -118,6 +120,7 @@ plot_means <- function(means1, means5, pars1, pars5) {
   points(0:2000, surv5, col = "grey", pch = 20, cex = 0.01)
   legend("topright", pch = pchs, bty = "n", col = cols, 
          legend = labs[[2]], ncol = 2)
+  dev.off()
 }
 
 # Tables -----------------------------------------------------------------------
@@ -171,9 +174,9 @@ make_subtable <- function(arr, partxt, survtxt) {
 #' @param bias5 Array of statistics for long survival
 #' @param pars1 A named list of dist. parameters for short survival setting
 #' @param pars5 A named list of dist. parameters for long survival setting
-#' @param filename Name of file (with extension) to save the table to
+#' @param fname Name of file (with extension) to save the table to
 #' @return NULL
-table_par <- function(bias1, bias5, pars1, pars5, filename) {
+table_par <- function(bias1, bias5, pars1, pars5, fname) {
   # Format subtables for each parameter and survival setting
   partxt1 <- paste(c("Shape =", "Scale ="), pars1)
   sub11 <- make_subtable(bias1[,1,,], partxt1[1], "Short survival")
@@ -188,7 +191,7 @@ table_par <- function(bias1, bias5, pars1, pars5, filename) {
     tab_spanner(label = "30", columns = 4:6) %>%
     tab_spanner(label = "365", columns = 7:9) %>%
     fmt_number(decimals = 5) %>% cols_align("center") %>%
-    gtsave(filename)
+    gtsave(fname)
 }
 
 
